@@ -2,3 +2,7 @@
 	path = lib/seqan3
 	url = https://github.com/seqan/seqan3.git
 	branch = master
+[submodule "raptor_data_simulation"]
+	path = lib/raptor_data_simulation
+	url = git@github.com:eseiler/raptor_data_simulation.git
+	branch = master
