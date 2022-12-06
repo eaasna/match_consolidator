@@ -1,0 +1,12 @@
+workdir: "../data/"
+
+# simulation parameters
+reference_length: 1024 # should ref_len always == query_len?
+query_length: 1024
+match_count: 1 # (1024 / 2000) < 1 match per query file
+seg_overlap: 150
+bin_nr: 4
+
+# evaluation parameters
+repeat: 2
+
