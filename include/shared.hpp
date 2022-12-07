@@ -30,6 +30,9 @@ struct consolidation_arguments
 struct stellar_match
 {
     std::string dname{};
+    size_t segment_start{};
+    size_t segment_length{};
+
     uint64_t dbegin{};
     uint64_t dend{};
     float percid{};
@@ -47,9 +50,15 @@ struct stellar_match
 
     stellar_match(std::vector<std::string> const match_vec)
     {
-        dname = match_vec[0];
-        dbegin = stoi(match_vec[3]);
-        dend = stoi(match_vec[4]);
+        size_t first_delim = match_vec[0].find("_");
+        size_t second_delim = match_vec[0].find("_", first_delim + 1);
+
+        dname = match_vec[0].substr(0, first_delim);
+        segment_start = stoi(match_vec[0].substr(first_delim + 1, second_delim - first_delim));
+        segment_length = stoi(match_vec[0].substr(second_delim + 1));
+
+        dbegin = stoi(match_vec[3]) + segment_start;
+        dend = stoi(match_vec[4]) + segment_start;
         percid = std::stof(match_vec[5]);
 
         if (match_vec[6] == "-")
