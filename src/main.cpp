@@ -2,40 +2,46 @@
 
 #include <seqan3/argument_parser/all.hpp>
 
-#include "fastq_conversion.hpp"
+#include "match_consolidation.hpp"
 
 int main(int argc, char ** argv)
 {
-    seqan3::argument_parser parser{"Fastq-to-Fasta-Converter", argc, argv};
+    seqan3::argument_parser parser{"DREAM-Stellar-match-consolidator", argc, argv};
 
-    // Declarations for argument parser
-    std::filesystem::path fastq_file{};
-    std::filesystem::path output_file{};
-    bool verbose = false;
+    consolidation_arguments arguments;
 
     // Parser
-    parser.info.author = "SeqAn-Team"; // give parser some infos
+    parser.info.author = "Evelin Aasna";
     parser.info.version = "1.0.0";
-    parser.add_positional_option(fastq_file, "Please provide a fastq file.",
-                                 seqan3::input_file_validator{{"fq","fastq"}}); // Takes a fastq file and validates it
-    //output path as option, otherwise output is printed
-    parser.add_option(output_file, 'o', "output", "The file for fasta output. Default: stdout");
-    parser.add_flag(verbose, 'v', "verbose", "Give more detailed information here."); // example for a flag
+
+    parser.add_option(arguments.input_file,
+                    'i',
+                    "in",
+                    "The file for GFF input.",
+                    seqan3::option_spec::required,
+                    seqan3::input_file_validator{{"gff"}});
+    parser.add_option(arguments.output_file,
+                    'o',
+                    "out",
+                    "The file for GFF output.",
+                    seqan3::option_spec::required,
+                    seqan3::output_file_validator{seqan3::output_file_open_options::create_new, {"gff"}});
+    parser.add_flag(arguments.verbose,
+                    'v',
+                    "verbose",
+                    "Give more detailed information here.");
 
     try
     {
-         parser.parse();                                                  // trigger command line parsing
+         parser.parse();
     }
-    catch (seqan3::argument_parser_error const & ext)                     // catch user errors
+    catch (seqan3::argument_parser_error const & ext)
     {
-        std::cerr << "Parsing error. " << ext.what() << "\n"; // give error message
+        std::cerr << "Parsing error. " << ext.what() << "\n";
         return -1;
     }
 
-    convert_fastq(fastq_file, output_file); // Call fastq to fasta converter
-
-    if (verbose) // if flag is set
-        std::cerr << "Conversion was a success. Congrats!\n";
+    consolidate_matches(arguments);
 
     return 0;
 }
