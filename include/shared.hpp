@@ -85,4 +85,12 @@ struct stellar_match
         seqan3::debug_stream << "\t" << "." << "\t" << query_id << ";" << attribute_keys[0] << qbegin << "," << qend << ";"
                              << attribute_keys[1] << cigar << ";" << attribute_keys[2] << mutations << "\n";
     }
+
+    bool operator==(stellar_match const & other)
+    {
+        if (dname == other.dname && dbegin == other.dbegin)
+            return true;
+        else
+            return false;
+    }
 };
