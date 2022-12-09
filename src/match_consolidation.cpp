@@ -1,5 +1,18 @@
 #include "match_consolidation.hpp"
 
+void write_output_gff(std::filesystem::path const & out_path, std::vector<stellar_match> const & matches)
+{
+    std::ofstream fout(out_path);
+
+    if(fout.is_open())
+    {
+        for (auto match : matches)
+            fout << match.to_string();
+
+        fout.close();
+    }
+}
+
 void consolidate_matches(consolidation_arguments const & arguments)
 {
     std::ifstream fin(arguments.input_file);
@@ -20,16 +33,15 @@ void consolidate_matches(consolidation_arguments const & arguments)
         }
         else
         {
-            if ((*duplicate_loc).dend < match.dend)
+            // TODO: unify adjacent matches if they overlap two segments
+            if ((*duplicate_loc).percid < match.percid)
             {
                 matches.erase(duplicate_loc);
                 matches.push_back(match);
             }
         }
     }
-
-    for (auto & match : matches)
-        match.print();
-
     fin.close();
+
+    write_output_gff(arguments.output_file, matches);
 }

@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -73,17 +74,52 @@ struct stellar_match
         mutations = attribute_vec[3].substr(attribute_keys[2].size());
     }
 
-    void print()
+    std::string get_percid_str()
     {
-        seqan3::debug_stream << dname << "\t" << "Stellar" << "\t" << "eps-matches" << "\t"
-                             << dbegin << "\t" << dend << "\t" << percid << "\t";
-        if (is_forward_match)
-            seqan3::debug_stream << "+";
-        else
-            seqan3::debug_stream << "-";
+        std::stringstream stream;
+        // Stellar outputs floating point percentages with 4 decimal precision
+        stream << std::fixed << std::setprecision(4) << percid;
+        std::string str_percid = stream.str();
+        // Remove trailing 0s
+        str_percid.erase ( str_percid.find_last_not_of('0') + 1, std::string::npos );
+        str_percid.erase ( str_percid.find_last_not_of('.') + 1, std::string::npos );
 
-        seqan3::debug_stream << "\t" << "." << "\t" << query_id << ";" << attribute_keys[0] << qbegin << "," << qend << ";"
-                             << attribute_keys[1] << cigar << ";" << attribute_keys[2] << mutations << "\n";
+        return str_percid;
+    }
+
+    std::string to_string()
+    {
+        std::string match_str = dname;
+        match_str += "\tStellar\teps-matches\t";
+        match_str += std::to_string(dbegin);
+        match_str += "\t";
+        match_str += std::to_string(dend);
+        match_str += "\t";
+        match_str += get_percid_str();
+
+        match_str += "\t";
+
+        if (is_forward_match)
+            match_str += "+";
+        else
+            match_str += "-";
+
+        match_str += "\t.\t";
+        match_str += query_id;
+        match_str += ";";
+        match_str += attribute_keys[0];
+        match_str += std::to_string(qbegin);
+        match_str += ",";
+        match_str += std::to_string(qend);
+        match_str += ";";
+        match_str += attribute_keys[1];
+        match_str += cigar;
+        match_str += ";";
+        match_str += attribute_keys[2];
+        match_str += mutations;
+        match_str += "\n";
+
+        return match_str;
     }
 
     bool operator==(stellar_match const & other)
