@@ -35,9 +35,18 @@ rule concat_dream_stellar:
 	input:
 		expand("dream_stellar/b{bin}_e{{er}}.gff", bin = bin_list)
 	output:
-		"dream_stellar/e{er}.gff"
-	params:
-		e = get_float_er
+		"dream_stellar/joined_e{er}.gff"
 	shell:
 		"cat {input} > {output}"
+
+# TODO: 
+# Merge adjacent alignments when overlapping two segments
+# Pick alignments based on search scheme (single best ...) 
+rule consolidate_dream_stellar:
+	input:
+		"dream_stellar/joined_e{er}.gff"
+	output:
+		"dream_stellar/e{er}.gff"
+	shell:
+		"consolidate -i {input} -o {output}"
 

@@ -1,12 +1,17 @@
 workdir: "../data/"
 
-# simulation parameters
+# Simulation parameters
 reference_length: 1024 # should ref_len always == query_len?
 query_length: 1024
-match_count: 1 # (1024 / 2000) < 1 match per query file
-seg_overlap: 150
-bin_nr: 4
+match_count: 10 # (1024 / 2000) < 1 match per query file
+min_match_len: 50
+max_match_len: 200
 
-# evaluation parameters
+# DREAM-Stellar parameters
+bin_nr: 4
+error_rates: [0.05]
+
+# Evaluation parameters
+min_truth_overlap: 40
 repeat: 2
 

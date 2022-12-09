@@ -6,6 +6,7 @@ ERROR_RATE=$1
 MATCH_COUNT=$2
 MIN_LEN=$3
 MAX_LEN=$4
+SEED=$5
 
 echo "Sampling $MATCH_COUNT local matches between $MIN_LEN and $MAX_LEN bp with an error rate of $ERROR_RATE"
 
@@ -17,6 +18,7 @@ $BINARY_DIR/generate_local_matches \
 	--num-matches $MATCH_COUNT \
 	--min-match-length $MIN_LEN \
 	--max-match-length $MAX_LEN \
+	--seed $SEED \
 	--verbose-ids \
 	ref.fasta &> /dev/null
 

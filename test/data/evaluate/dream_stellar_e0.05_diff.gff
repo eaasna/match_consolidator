@@ -1,0 +1,6 @@
+1	Stellar	eps-matches	177	307	95.4545	+	.	1;seq2Range=1807,1937;cigar=92M1D1M1I37M;mutations=54C,70A,84T,94G,109A
+1	Stellar	eps-matches	469	557	95.5056	+	.	1;seq2Range=60,148;cigar=89M;mutations=15G,58C,60A,87A
+1	Stellar	eps-matches	271	356	95.3488	+	.	1;seq2Range=1901,1986;cigar=86M;mutations=15A,45C,56G,69C
+1	Stellar	eps-matches	747	821	96	+	.	1;seq2Range=662,736;cigar=75M;mutations=2T,21C,73G
+1	Stellar	eps-matches	529	582	96.2962	+	.	1;seq2Range=120,173;cigar=54M;mutations=27A,30G
+1	Stellar	eps-matches	772	943	95.3757	+	.	1;seq2Range=687,859;cigar=168M1I4M;mutations=48G,56C,70C,88C,96T,164A,169A,172G

@@ -1,27 +1,32 @@
+# Simulation parameters
 ref_len = config["reference_length"]
 query_len = config["query_length"]
 matches = config["match_count"]
-seg_overlap = config["seg_overlap"]
+
+# local match lengths 
+min_len = config["min_match_len"]
+max_len = config["max_match_len"]
+
+# DREAM-Stellar parameters
+seg_overlap = min_len
 bin_nr = config["bin_nr"]
 bin_list = list(range(bin_nr))
-error_rates = [0.05]
+error_rates = config["error_rates"]
+
+# Evaluation parameters
+min_overlap = config["min_truth_overlap"] #how much stellar match has to overlap the ground truth
 
 workdir: config['workdir']
 
-# local match lengths 
-min_len = 50
-max_len = 200
-
-# how much stellar match has to overlap the ground truth
-min_overlap = 40
 
 rule make_all:
 	input:
-		expand("stellar/e{er}.gff", er = error_rates),
-		expand("dream_stellar/e{er}.gff", er = error_rates)
+		expand("evaluate/stellar_e{er}_diff.gff", er = error_rates),
+		expand("evaluate/dream_stellar_e{er}_diff.gff", er = error_rates)
 	shell:
 		"echo 'Done'"
 
 include: "rules/simulate.smk"
 include: "rules/stellar.smk"
+include: "rules/evaluate.smk"
 
