@@ -48,5 +48,5 @@ rule consolidate_dream_stellar:
 	output:
 		"dream_stellar/e{er}.gff"
 	shell:
-		"consolidate -i {input} -o {output}"
+		"consolidate -i {input} -o {output} --overlap {seg_overlap}"
 

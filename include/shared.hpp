@@ -25,6 +25,7 @@ struct consolidation_arguments
 {
     std::filesystem::path input_file{};
     std::filesystem::path output_file{};
+    size_t overlap_length{};
     bool verbose{false};
 };
 
@@ -33,6 +34,7 @@ struct stellar_match
     std::string dname{};
     size_t segment_start{};
     size_t segment_length{};
+    size_t segment_overlap{};
 
     uint64_t dbegin{};
     uint64_t dend{};
@@ -49,10 +51,11 @@ struct stellar_match
     // 1;seq2Range=1280,1378;cigar=97M1D2M;mutations=14A,45G,58T,92C
     std::vector<std::string> attribute_keys{"seq2Range=", "cigar=", "mutations="};
 
-    stellar_match(std::vector<std::string> const match_vec)
+    stellar_match(std::vector<std::string> const match_vec, uint16_t const seg_overlap)
     {
         size_t first_delim = match_vec[0].find("_");
         size_t second_delim = match_vec[0].find("_", first_delim + 1);
+        segment_overlap = seg_overlap;
 
         dname = match_vec[0].substr(0, first_delim);
         segment_start = stoi(match_vec[0].substr(first_delim + 1, second_delim - first_delim));
@@ -60,6 +63,7 @@ struct stellar_match
 
         dbegin = stoi(match_vec[3]) + segment_start;
         dend = stoi(match_vec[4]) + segment_start;
+
         percid = std::stof(match_vec[5]);
 
         if (match_vec[6] == "-")
@@ -73,6 +77,56 @@ struct stellar_match
         cigar = attribute_vec[2].substr(attribute_keys[1].size());
         mutations = attribute_vec[3].substr(attribute_keys[2].size());
     }
+
+    bool operator==(stellar_match const & other)
+    {
+        if (dname == other.dname && (dbegin == other.dbegin || dend == other.dend))
+            return true;
+        else
+            return false;
+    }
+
+    /*
+    segments |------------|
+                       |------------|
+    this            xxxxxx
+    other               xxxxxx
+    */
+    bool on_previous_segment(stellar_match const & other)
+    {
+        if (dname == other.dname && segment_start + segment_length == other.segment_start + segment_overlap)
+            return true;
+        else
+            return false;
+    }
+
+    /*
+    segments |------------|
+                       |------------|
+    this                xxxxxx
+    other           xxxxxx
+    */
+    bool on_next_segment(stellar_match const & other)
+    {
+        if (dname == other.dname && other.segment_start + other.segment_length == segment_start + segment_overlap)
+            return true;
+        else
+            return false;
+    }
+
+    bool overlaps_query(stellar_match const & other)
+    {
+        if (query_id == other.query_id)
+        {
+            // given two ranges [qbegin;qend] and [other.qbegin;other.qend]
+            // test if ranges overlap
+            if (qbegin <= other.qend && other.qbegin <= qend)
+                return true;
+        }
+
+        return false;
+    }
+
 
     std::string get_percid_str()
     {
@@ -120,13 +174,5 @@ struct stellar_match
         match_str += "\n";
 
         return match_str;
-    }
-
-    bool operator==(stellar_match const & other)
-    {
-        if (dname == other.dname && dbegin == other.dbegin)
-            return true;
-        else
-            return false;
     }
 };

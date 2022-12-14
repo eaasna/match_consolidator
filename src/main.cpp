@@ -26,6 +26,12 @@ int main(int argc, char ** argv)
                     "The file for GFF output.",
                     seqan3::option_spec::required,
                     seqan3::output_file_validator{seqan3::output_file_open_options::create_new, {"gff"}});
+    parser.add_option(arguments.overlap_length,
+                    '\0',
+                    "overlap",
+                    "Segment overlap.",
+                    seqan3::option_spec::required,
+                    seqan3::arithmetic_range_validator{0, 500});
     parser.add_flag(arguments.verbose,
                     'v',
                     "verbose",
