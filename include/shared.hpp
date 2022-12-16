@@ -87,11 +87,9 @@ struct gff_mutations
 
     void join_mutations(gff_mutations const & other)
     {
-
-        //!TODO: need to add this* mutations to the end of other* mutations
         auto mut_it = std::find_if(other.mut_vec.begin(),
                                 other.mut_vec.end(),
-                                [&](const auto & mut) { return mut.pos > other.abs_pos + max_pos; });
+                                [&](const auto & mut) { return mut.pos + other.abs_pos > abs_pos + max_pos; });
 
         for (;mut_it != other.mut_vec.end(); mut_it++)
         {
@@ -215,8 +213,8 @@ struct stellar_match
     */
     void join_adjacent_matches(stellar_match const & match)
     {
-        dbegin = match.dbegin;
-        qbegin = match.qbegin;
+        dend = match.dend;
+        qend = match.qend;
         percid = 100;
 
         mutations.join_mutations(match.mutations);

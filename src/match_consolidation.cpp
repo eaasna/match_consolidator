@@ -22,7 +22,7 @@ void consolidate_overlap_match(std::vector<stellar_match> & matches, stellar_mat
     {
         /* Case A
         segments |------------|
-                        |------------|
+                           |------------|
         match           xxxxxx
         other               xxxxxx
 
@@ -30,12 +30,15 @@ void consolidate_overlap_match(std::vector<stellar_match> & matches, stellar_mat
         */
         if (match.dbegin < (*it).dbegin)
         {
-            (*it).join_adjacent_matches(match);
+            stellar_match match_copy = *it;
+            // switch this and match and reuse code from Case B
+            *it = match;
+            (*it).join_adjacent_matches(match_copy);
         }
 
         /* Case B
         segments |------------|
-                        |------------|
+                           |------------|
         match               xxxxxx
         other           xxxxxx
 
@@ -44,10 +47,7 @@ void consolidate_overlap_match(std::vector<stellar_match> & matches, stellar_mat
 
         else if (match.dbegin > (*it).dbegin)
         {
-            stellar_match match_copy = *it;
-            // switch this and match to avoid writing mirrorred functions for both cases
-            *it = match;
-            (*it).join_adjacent_matches(match_copy);
+            (*it).join_adjacent_matches(match);
         }
 
         /* Case C
