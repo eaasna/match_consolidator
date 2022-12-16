@@ -39,6 +39,84 @@ struct consolidation_arguments
     bool verbose{false};
 };
 
+struct gff_mutations
+{
+    gff_mutations() = default;
+    gff_mutations(gff_mutations const &) = default;
+    gff_mutations & operator=(gff_mutations const &) = default;
+    gff_mutations(gff_mutations &&) = default;
+    gff_mutations & operator=(gff_mutations &&) = default;
+    ~gff_mutations() = default;
+
+    struct mutation
+    {
+        uint16_t pos;
+        char allele;
+
+        mutation(std::string mutation_str)
+        {
+            pos = std::stoi(mutation_str.substr(0, mutation_str.size() - 1));
+            allele = mutation_str[mutation_str.size() - 1];
+        }
+
+        void increase_pos(uint16_t const increase)
+        {
+            pos += increase;
+        }
+    };
+
+    uint64_t abs_pos;
+    uint16_t max_pos{0};
+    std::vector<mutation> mut_vec;
+    std::string prefix = "mutations=";
+
+    gff_mutations(std::string const mutations_str, uint64_t const dbegin)
+    {
+        std::istringstream iss(mutations_str.substr(prefix.size()));
+        std::string field;
+        while(std::getline(iss, field, ','))
+        {
+            mutation mut(field);
+            mut_vec.emplace_back(mut);
+            if (mut.pos > max_pos)
+                max_pos = mut.pos;
+        }
+
+        abs_pos = dbegin;
+    }
+
+    void join_mutations(gff_mutations const & other)
+    {
+
+        //!TODO: need to add this* mutations to the end of other* mutations
+        auto mut_it = std::find_if(other.mut_vec.begin(),
+                                other.mut_vec.end(),
+                                [&](const auto & mut) { return mut.pos > other.abs_pos + max_pos; });
+
+        for (;mut_it != other.mut_vec.end(); mut_it++)
+        {
+            mutation adjusted_mut = *mut_it;
+            adjusted_mut.increase_pos(other.abs_pos - abs_pos);
+            mut_vec.push_back(adjusted_mut);
+        }
+    }
+
+    std::string to_string()
+    {
+        std::string mut_str = prefix;
+
+        for (auto mut : mut_vec)
+        {
+            mut_str += std::to_string(mut.pos);
+            mut_str += mut.allele;
+            mut_str += ",";
+        }
+
+        return mut_str.substr(0, mut_str.size() - 1);
+    }
+
+};
+
 struct stellar_match
 {
     std::string dname{};
@@ -55,8 +133,7 @@ struct stellar_match
     uint64_t qbegin{};
     uint64_t qend{};
     std::string cigar{};
-    std::string mutations{};
-    std::vector<uint16_t> mut_vec{};
+    gff_mutations mutations;
 
     // Stellar GFF attributes
     // 1;seq2Range=1280,1378;cigar=97M1D2M;mutations=14A,45G,58T,92C
@@ -87,11 +164,7 @@ struct stellar_match
         qend = stoi(attribute_vec[1].substr(delim_pos + 1));
         cigar = attribute_vec[2].substr(attribute_keys[1].size());
 
-        mutations = attribute_vec[3].substr(attribute_keys[2].size());
-        std::istringstream iss(mutations);
-        std::string field;
-        while(std::getline(iss, field, ','))
-            mut_vec.push_back(std::stoi(field.substr(0, field.size() - 1)));
+        mutations = gff_mutations(attribute_vec[3], dbegin);
     }
 
     bool is_in_segment_overlap()
@@ -131,19 +204,22 @@ struct stellar_match
         return false;
     }
 
-    // TODO: update percid, cigar, mutations
+    // TODO: update percid, cigar
+    /* Case A
+    segments |------------|
+                       |------------|
+    match           xxxxxx
+    this                xxxxxx
+
+    joined          xxxxxxxxx
+    */
     void join_adjacent_matches(stellar_match const & match)
     {
         dbegin = match.dbegin;
         qbegin = match.qbegin;
         percid = 100;
 
-        auto mut_it = std::find_if(match.mut_vec.begin(),
-                                    match.mut_vec.end(),
-                                    [&](const auto & mut_pos) { return mut_pos > dend - match.dbegin; });
-
-        for (;mut_it != match.mut_vec.end(); mut_it++)
-            mut_vec.push_back((*mut_it) + match.dbegin - dbegin);
+        mutations.join_mutations(match.mutations);
     }
 
     std::string get_percid_str()
@@ -187,8 +263,7 @@ struct stellar_match
         match_str += attribute_keys[1];
         match_str += cigar;
         match_str += ";";
-        match_str += attribute_keys[2];
-        match_str += mutations;
+        match_str += mutations.to_string();
         match_str += "\n";
 
         return match_str;

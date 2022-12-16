@@ -10,7 +10,6 @@ int main(int argc, char ** argv)
 
     consolidation_arguments arguments;
 
-    // Parser
     parser.info.author = "Evelin Aasna";
     parser.info.version = "1.0.0";
 
