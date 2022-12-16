@@ -9,4 +9,4 @@
  *  TODO:
  *  Pick matches based on search scheme (single-best, all-best etc)
  */
-void consolidate_matches(consolidation_arguments const & arguments);
+void process_matches(consolidation_arguments const & arguments);

@@ -13,8 +13,6 @@ rule stellar:
                 "stellar/e{er}.gff"
         params:
                 e = get_float_er
-        benchmark:
-                "benchmarks/stellar_e{er}.txt"
         shell:
                 "stellar --verbose {input.ref} {input.query} -e {params.e} -l {min_len} -a dna -o {output}"
 
@@ -26,8 +24,6 @@ rule dream_stellar:
 		"dream_stellar/b{bin}_e{er}.gff"
 	params:
 		e = get_float_er
-	benchmark:
-		"benchmarks/dream_stellar_b{bin}_e{er}.txt"
 	shell:
 		"stellar --verbose {input.ref} {input.query} -e {params.e} -l {min_len} -a dna -o {output}"
 
@@ -40,7 +36,6 @@ rule concat_dream_stellar:
 		"cat {input} > {output}"
 
 # TODO: 
-# Merge adjacent alignments when overlapping two segments
 # Pick alignments based on search scheme (single best ...) 
 rule consolidate_dream_stellar:
 	input:

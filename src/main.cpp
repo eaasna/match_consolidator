@@ -47,7 +47,7 @@ int main(int argc, char ** argv)
         return -1;
     }
 
-    consolidate_matches(arguments);
+    process_matches(arguments);
 
     return 0;
 }
