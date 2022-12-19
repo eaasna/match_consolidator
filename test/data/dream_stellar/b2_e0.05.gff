@@ -1,0 +1,5 @@
+1_514_307	Stellar	eps-matches	114	299	95.2127	+	.	1;seq2Range=446,632;cigar=2M1I172M1I1M1D10M;mutations=3A,46C,63G,96C,105T,135G,168C,176C
+1_514_307	Stellar	eps-matches	66	193	95.3125	+	.	1;seq2Range=1056,1183;cigar=128M;mutations=12A,22A,33T,39T,52A,63G
+1_514_307	Stellar	eps-matches	233	307	96	+	.	1;seq2Range=662,736;cigar=75M;mutations=2T,21C,73G
+1_514_307	Stellar	eps-matches	15	68	96.2962	+	.	1;seq2Range=120,173;cigar=54M;mutations=27A,30G
+1_514_307	Stellar	eps-matches	194	247	96.3636	+	.	1;seq2Range=912,966;cigar=53M1I1M;mutations=26A,54T

@@ -5,6 +5,8 @@ def get_float_er(wildcards):
                 return f'{a:.5f}' # supress scientific notation 
         return float(wildcards.er)
 
+stellar_dir = "../../../stellar/build/bin"
+
 rule stellar:
         input:
                 ref = "ref.fasta",
@@ -14,7 +16,7 @@ rule stellar:
         params:
                 e = get_float_er
         shell:
-                "stellar --verbose {input.ref} {input.query} -e {params.e} -l {min_len} -a dna -o {output}"
+                "{stellar_dir}/stellar --verbose {input.ref} {input.query} -e {params.e} -l {min_len} -a dna -o {output}"
 
 rule dream_stellar:
 	input:
@@ -25,7 +27,7 @@ rule dream_stellar:
 	params:
 		e = get_float_er
 	shell:
-		"stellar --verbose {input.ref} {input.query} -e {params.e} -l {min_len} -a dna -o {output}"
+		"{stellar_dir}/stellar --verbose {input.ref} {input.query} -e {params.e} -l {min_len} -a dna -o {output}"
 
 rule concat_dream_stellar:
 	input:
@@ -35,8 +37,6 @@ rule concat_dream_stellar:
 	shell:
 		"cat {input} > {output}"
 
-# TODO: 
-# Pick alignments based on search scheme (single best ...) 
 rule consolidate_dream_stellar:
 	input:
 		"dream_stellar/joined_e{er}.gff"

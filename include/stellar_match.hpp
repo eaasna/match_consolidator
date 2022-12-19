@@ -1,7 +1,7 @@
 #pragma once
 
-#include "shared.hpp"
 #include "gff_mutations.hpp"
+#include "gff_percid.hpp"
 
 struct stellar_match
 {
@@ -12,7 +12,7 @@ struct stellar_match
 
     uint64_t dbegin{};
     uint64_t dend{};
-    float percid{};
+    gff_percid percid;
     bool is_forward_match{true};
 
     std::string query_id{};
@@ -38,7 +38,7 @@ struct stellar_match
         dbegin = stoi(match_vec[3]) + segment_start;
         dend = stoi(match_vec[4]) + segment_start;
 
-        percid = std::stof(match_vec[5]);
+        percid = gff_percid(match_vec[5]);
 
         if (match_vec[6] == "-")
             is_forward_match = false;
@@ -90,35 +90,21 @@ struct stellar_match
         return false;
     }
 
-    // TODO: update percid, cigar
+    // TODO: update cigar
     /* Case A
     segments |------------|
                        |------------|
     match           xxxxxx
     this                xxxxxx
 
-    joined          xxxxxxxxx
+    joined          xxxxxxxxxx
     */
     void join_adjacent_matches(stellar_match const & match)
     {
         dend = match.dend;
         qend = match.qend;
-        percid = 100;
-
         mutations.join_mutations(match.mutations);
-    }
-
-    std::string get_percid_str()
-    {
-        std::stringstream stream;
-        // Stellar outputs floating point percentages with 4 decimal precision
-        stream << std::fixed << std::setprecision(4) << percid;
-        std::string str_percid = stream.str();
-        // Remove trailing 0s
-        str_percid.erase ( str_percid.find_last_not_of('0') + 1, std::string::npos );
-        str_percid.erase ( str_percid.find_last_not_of('.') + 1, std::string::npos );
-
-        return str_percid;
+        percid.update(dbegin, mutations, dend);
     }
 
     std::string to_string()
@@ -129,7 +115,7 @@ struct stellar_match
         match_str += "\t";
         match_str += std::to_string(dend);
         match_str += "\t";
-        match_str += get_percid_str();
+        match_str += percid.to_string();
 
         match_str += "\t";
 

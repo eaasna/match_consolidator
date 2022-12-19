@@ -57,9 +57,9 @@ void consolidate_overlap_match(std::vector<stellar_match> & matches, stellar_mat
         other            xxxxx
 
         */
-        else if (match.dend == (*it).dend)
+        else if (match.dbegin == (*it).dbegin || match.dend == (*it).dend)
         {
-            if (match.percid > (*it).percid)
+            if (match.percid.get() > (*it).percid.get())
             {
                 *it = match;
             }
