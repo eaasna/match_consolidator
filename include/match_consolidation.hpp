@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shared.hpp"
+#include "stellar_match.hpp"
 
 #include <seqan3/io/sequence_file/all.hpp>
 
