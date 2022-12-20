@@ -11,6 +11,14 @@ struct gff_cigar
         std::string prefix = "cigar=";
         std::vector<char> valid_chars{'M', 'I', 'D'};
 
+        void erase_el(bool const delete_front)
+        {
+            if (delete_front)
+                vec.erase(vec.begin());
+            else
+                vec.pop_back();
+        }
+
     public:
         gff_cigar() = default;
         gff_cigar(gff_cigar const &) = default;
@@ -32,12 +40,49 @@ struct gff_cigar
                 {
                     seqan3::cigar::operation letter{};
                     letter.assign_char(cigar_str[char_ind]);
-                    seqan3::cigar cig{stoi(cigar_str.substr(first_ind, char_ind)), letter};
-
+                    seqan3::cigar cig{static_cast<uint32_t>(std::stoi(cigar_str.substr(first_ind, char_ind))), letter};
                     vec.push_back(cig);
                     first_ind = char_ind + 1;
                 }
             }
+        }
+
+        void adjust_pos(bool const delete_front, size_t shift)
+        {
+            int8_t incr = 1;
+            int8_t i = 0;
+            if (!delete_front)
+            {
+                incr = -1;
+                i = vec.size() - 1;
+            }
+
+            for (;i < static_cast<uint16_t>(vec.size()) && i > -1; i += incr)
+            {
+                if (get<0>(vec[i]) > shift)
+                {
+                    seqan3::cigar new_cig{get<0>(vec[i]) - static_cast<uint8_t>(shift), get<1>(vec[i])};
+                    vec[i] = new_cig;
+                    return;
+                }
+                else if (get<0>(vec[i]) == shift)
+                {
+                    erase_el(delete_front);
+                    return;
+                }
+                else
+                {
+                    erase_el(delete_front);
+                    shift -= get<0>(vec[i]);
+                }
+            }
+
+            return;
+        }
+
+        void join_cigars(gff_cigar const & other)
+        {
+
         }
 
         std::string to_string()
