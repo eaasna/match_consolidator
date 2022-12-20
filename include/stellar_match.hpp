@@ -1,5 +1,6 @@
 #pragma once
 
+#include "gff_cigar.hpp"
 #include "gff_mutations.hpp"
 #include "gff_percid.hpp"
 
@@ -15,15 +16,14 @@ struct stellar_match
     gff_percid percid;
     bool is_forward_match{true};
 
+    // Stellar GFF attributes
+    // 1;seq2Range=1280,1378;cigar=97M1D2M;mutations=14A,45G,58T,92C
+    std::string query_key = "seq2Range=";
     std::string query_id{};
     uint64_t qbegin{};
     uint64_t qend{};
-    std::string cigar{};
+    gff_cigar cigar;
     gff_mutations mutations;
-
-    // Stellar GFF attributes
-    // 1;seq2Range=1280,1378;cigar=97M1D2M;mutations=14A,45G,58T,92C
-    std::vector<std::string> attribute_keys{"seq2Range=", "cigar=", "mutations="};
 
     stellar_match(std::vector<std::string> const match_vec, consolidation_arguments const & arguments)
     {
@@ -46,10 +46,9 @@ struct stellar_match
         auto attribute_vec = get_line_vector<std::string>(match_vec[8], ';');
         query_id = attribute_vec[0];
         uint8_t delim_pos = attribute_vec[1].find(",");
-        qbegin = stoi(attribute_vec[1].substr(attribute_keys[0].size(), delim_pos - attribute_keys[0].size()));
+        qbegin = stoi(attribute_vec[1].substr(query_key.size(), delim_pos - query_key.size()));
         qend = stoi(attribute_vec[1].substr(delim_pos + 1));
-        cigar = attribute_vec[2].substr(attribute_keys[1].size());
-
+        cigar = gff_cigar(attribute_vec[2]);
         mutations = gff_mutations(attribute_vec[3], dbegin);
     }
 
@@ -90,7 +89,6 @@ struct stellar_match
         return false;
     }
 
-    // TODO: update cigar
     /* Case A
     segments |------------|
                        |------------|
@@ -144,13 +142,12 @@ struct stellar_match
         match_str += "\t.\t";
         match_str += query_id;
         match_str += ";";
-        match_str += attribute_keys[0];
+        match_str += query_key;
         match_str += std::to_string(qbegin);
         match_str += ",";
         match_str += std::to_string(qend);
         match_str += ";";
-        match_str += attribute_keys[1];
-        match_str += cigar;
+        match_str += cigar.to_string();
         match_str += ";";
         match_str += mutations.to_string();
         match_str += "\n";
