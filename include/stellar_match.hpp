@@ -25,11 +25,11 @@ struct stellar_match
     // 1;seq2Range=1280,1378;cigar=97M1D2M;mutations=14A,45G,58T,92C
     std::vector<std::string> attribute_keys{"seq2Range=", "cigar=", "mutations="};
 
-    stellar_match(std::vector<std::string> const match_vec, uint16_t const seg_overlap)
+    stellar_match(std::vector<std::string> const match_vec, consolidation_arguments const & arguments)
     {
         size_t first_delim = match_vec[0].find("_");
         size_t second_delim = match_vec[0].find("_", first_delim + 1);
-        segment_overlap = seg_overlap;
+        segment_overlap = arguments.overlap_length;
 
         dname = match_vec[0].substr(0, first_delim);
         segment_start = stoi(match_vec[0].substr(first_delim + 1, second_delim - first_delim));
@@ -38,7 +38,7 @@ struct stellar_match
         dbegin = stoi(match_vec[3]) + segment_start;
         dend = stoi(match_vec[4]) + segment_start;
 
-        percid = gff_percid(match_vec[5]);
+        percid = gff_percid(match_vec[5], arguments.max_err_rate);
 
         if (match_vec[6] == "-")
             is_forward_match = false;
@@ -105,6 +105,23 @@ struct stellar_match
         qend = match.qend;
         mutations.join_mutations(match.mutations);
         percid.update(dbegin, mutations, dend);
+
+        while (percid.too_many_errors())
+        {
+            auto [deleted_front, shift] =  mutations.shorten_match_greedily(dend);
+            if (deleted_front)
+            {
+                dbegin += shift;
+                qbegin += shift;
+            }
+            else
+            {
+                dend -= shift;
+                qend -= shift;
+            }
+
+            percid.update(dbegin, mutations, dend);
+        }
     }
 
     std::string to_string()

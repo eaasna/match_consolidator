@@ -6,10 +6,9 @@
 
 struct gff_percid
 {
-    //!TODO: if percid of joined alignment > allowed error rate -> can not join
-
     private:
         float perc;
+        float max_err_rate;
 
     public:
         gff_percid() = default;
@@ -19,9 +18,10 @@ struct gff_percid
         gff_percid & operator=(gff_percid &&) = default;
         ~gff_percid() = default;
 
-        gff_percid(std::string const field5)
+        gff_percid(std::string const field5, float const max_err)
         {
             perc = std::stof(field5);
+            max_err_rate = max_err;
         }
 
         float get() const
@@ -35,6 +35,13 @@ struct gff_percid
             // https://github.com/seqan/seqan/blob/f5f658343c366c9c3d44ba358ffc9317e78a09ed/apps/stellar/stellar_output.h#L192
             uint16_t ali_len = dend - dbegin + 1;
             perc = (1 - ( float ) mut.count() / ali_len) * 100;
+        }
+
+        bool too_many_errors()
+        {
+            if (perc < (1.0 - max_err_rate) * 100)
+                return true;
+            return false;
         }
 
         std::string to_string() const

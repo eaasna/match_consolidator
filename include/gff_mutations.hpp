@@ -16,9 +16,10 @@ struct gff_mutations
                 allele = mutation_str[mutation_str.size() - 1];
             }
 
-            void increase_pos(uint16_t const increase)
+            template <typename int_t>
+            void adjust_pos(int_t const adjustment)
             {
-                pos += increase;
+                pos += adjustment;
             }
         };
 
@@ -59,7 +60,7 @@ struct gff_mutations
             for (;mut_it != other.mut_vec.end(); mut_it++)
             {
                 mutation adjusted_mut = *mut_it;
-                adjusted_mut.increase_pos(other.abs_pos - abs_pos);
+                adjusted_mut.adjust_pos<uint16_t>(other.abs_pos - abs_pos);
                 mut_vec.push_back(adjusted_mut);
             }
         }
@@ -67,6 +68,30 @@ struct gff_mutations
         size_t count() const
         {
             return mut_vec.size();
+        }
+
+        std::pair<bool, uint16_t> shorten_match_greedily(uint64_t const dend)
+        {
+            uint16_t begin_shift = mut_vec[0].pos;
+            uint16_t end_shift = dend + 1 - max_pos;
+
+            if (begin_shift < end_shift)
+            {
+                abs_pos += begin_shift + 1;
+                mut_vec.erase(mut_vec.begin());
+
+                for (auto & mut : mut_vec)
+                    mut.adjust_pos<int16_t>(begin_shift * (-1));
+
+                return std::make_pair(true, begin_shift);
+            }
+            else
+            {
+                mut_vec.erase(mut_vec.end() - 1);
+                max_pos = mut_vec[-1].pos;
+
+                return std::make_pair(false, end_shift);
+            }
         }
 
         std::string to_string() const

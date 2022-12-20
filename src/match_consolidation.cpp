@@ -95,7 +95,7 @@ void process_matches(consolidation_arguments const & arguments)
     {
         auto line_vec = get_line_vector<std::string>(line, '\t');
         assert(line_vec.size() == 9); // Stellar GFF format output has 9 columns
-        stellar_match match(line_vec, arguments.overlap_length);
+        stellar_match match(line_vec, arguments);
 
         if (match.is_in_segment_overlap())
             consolidate_overlap_match(overlap_matches, match);

@@ -42,6 +42,8 @@ rule consolidate_dream_stellar:
 		"dream_stellar/joined_e{er}.gff"
 	output:
 		"dream_stellar/e{er}.gff"
+	params:
+		e = get_float_er
 	shell:
-		"consolidate -i {input} -o {output} --overlap {seg_overlap}"
+		"consolidate -i {input} -o {output} --overlap {seg_overlap} -e {params.e}"
 

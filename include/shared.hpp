@@ -36,5 +36,6 @@ struct consolidation_arguments
     std::filesystem::path input_file{};
     std::filesystem::path output_file{};
     size_t overlap_length{};
+    float max_err_rate{};
     bool verbose{false};
 };
