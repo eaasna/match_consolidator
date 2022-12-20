@@ -57,9 +57,9 @@ void consolidate_overlap_match(std::vector<stellar_match> & matches, stellar_mat
         other            xxxxx
 
         */
-        else if (match.dend == (*it).dend)
+        else if (match.dbegin == (*it).dbegin || match.dend == (*it).dend)
         {
-            if (match.percid > (*it).percid)
+            if (match.percid.get() > (*it).percid.get())
             {
                 *it = match;
             }
@@ -95,7 +95,7 @@ void process_matches(consolidation_arguments const & arguments)
     {
         auto line_vec = get_line_vector<std::string>(line, '\t');
         assert(line_vec.size() == 9); // Stellar GFF format output has 9 columns
-        stellar_match match(line_vec, arguments.overlap_length);
+        stellar_match match(line_vec, arguments);
 
         if (match.is_in_segment_overlap())
             consolidate_overlap_match(overlap_matches, match);

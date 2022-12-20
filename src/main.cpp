@@ -31,6 +31,12 @@ int main(int argc, char ** argv)
                     "Segment overlap.",
                     seqan3::option_spec::required,
                     seqan3::arithmetic_range_validator{0, 500});
+    parser.add_option(arguments.max_err_rate,
+                    'e',
+                    "max-err-rate",
+                    "Max error rate.",
+                    seqan3::option_spec::required,
+                    seqan3::arithmetic_range_validator{0.0, 1.0});
     parser.add_flag(arguments.verbose,
                     'v',
                     "verbose",
