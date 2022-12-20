@@ -101,8 +101,10 @@ struct stellar_match
     {
         dend = match.dend;
         qend = match.qend;
+
         mutations.join_mutations(match.mutations);
         percid.update(dbegin, mutations, dend);
+        cigar.join_cigars(match.cigar);
 
         while (percid.too_many_errors())
         {
@@ -119,6 +121,8 @@ struct stellar_match
             }
 
             percid.update(dbegin, mutations, dend);
+            seqan3::debug_stream << shift << '\n';
+            cigar.adjust_pos(deleted_front, shift);
         }
     }
 
