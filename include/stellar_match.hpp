@@ -48,7 +48,7 @@ struct stellar_match
         uint8_t delim_pos = attribute_vec[1].find(",");
         qbegin = stoi(attribute_vec[1].substr(query_key.size(), delim_pos - query_key.size()));
         qend = stoi(attribute_vec[1].substr(delim_pos + 1));
-        cigar = gff_cigar(attribute_vec[2]);
+        cigar = gff_cigar(dbegin, attribute_vec[2], dend);
         mutations = gff_mutations(attribute_vec[3], dbegin);
     }
 
@@ -92,19 +92,19 @@ struct stellar_match
     /* Case A
     segments |------------|
                        |------------|
-    match           xxxxxx
-    this                xxxxxx
+    this            xxxxxx
+    other               xxxxxx
 
     joined          xxxxxxxxxx
     */
-    void join_adjacent_matches(stellar_match const & match)
+    void join_adjacent_matches(stellar_match const & other)
     {
-        dend = match.dend;
-        qend = match.qend;
+        dend = other.dend;
+        qend = other.qend;
 
-        mutations.join_mutations(match.mutations);
+        mutations.join_mutations(other.mutations);
         percid.update(dbegin, mutations, dend);
-        cigar.join_cigars(match.cigar);
+        cigar.join_cigars(other.cigar);
 
         while (percid.too_many_errors())
         {
@@ -121,7 +121,6 @@ struct stellar_match
             }
 
             percid.update(dbegin, mutations, dend);
-            seqan3::debug_stream << shift << '\n';
             cigar.adjust_pos(deleted_front, shift);
         }
     }
