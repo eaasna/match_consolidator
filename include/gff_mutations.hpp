@@ -53,6 +53,14 @@ struct gff_mutations
 
         void join_mutations(gff_mutations const & other)
         {
+            /*
+            segments |------------|
+                              |------------|
+            this            xxxxxx
+            other              xxx{xxx}
+
+            join {xxx} to this
+            */
             auto mut_it = std::find_if(other.mut_vec.begin(),
                                     other.mut_vec.end(),
                                     [&](const auto & mut) { return mut.pos + other.abs_pos > abs_pos + max_pos; });
