@@ -34,3 +34,10 @@
 # Build
 build/*
 debug/*
+
+# Testing
+.snakemake/*
+
+# Visualisations
+*.drawio
+

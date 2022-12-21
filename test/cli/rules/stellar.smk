@@ -23,7 +23,7 @@ rule dream_stellar:
 		ref = "ref_{bin}.fasta",
 		query = "query/with_insertions_e{er}.fasta"
 	output:
-		"dream_stellar/b{bin}_e{er}.gff"
+		temp("dream_stellar/b{bin}_e{er}.gff")
 	params:
 		e = get_float_er
 	shell:

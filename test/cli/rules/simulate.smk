@@ -6,6 +6,7 @@ def get_seed(wildcards):
 rule simulate_sequences:
 	output:
 		ref = "ref.fasta",
+		prelim = temp("query/query.fasta"),
 		query = temp("query/one_line.fasta")
 	params:
 		#ref_seed = get_seed,
@@ -50,7 +51,7 @@ rule insert_matches:
 		matches = "local_matches/e{er}.fastq"
 	output:     
 		query = "query/with_insertions_e{er}.fasta",
-		ground_truth = "ground_truth/e{er}.tsv"
+		ground_truth = temp("ground_truth/e{er}.tsv")
 	params:     
 		#seed = get_seed
 		seed = 92436

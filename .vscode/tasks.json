@@ -4,7 +4,7 @@
         {
             "label": "build",
             "type": "shell",
-            "command": "cd ${fileDirname}/../debug && make"
+            "command": "cd ${fileDirname}/../debug && make -j 6"
         }
     ]
 }
